@@ -31,7 +31,7 @@ export default function CalendarTable() {
   useEffect(() => {
     const fetchCalendars = async () => {
       try {
-        const res = await fetch("${process.env.NEXT_PUBLIC_API_BASE_URL}/getcalendars", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/getcalendars`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

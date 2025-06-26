@@ -35,7 +35,7 @@ export default function UserCalendarModals() {
 
   const [teams, setTeams] = useState<Team[]>([]);
 useEffect(() => {
-  fetch("${process.env.NEXT_PUBLIC_API_BASE_URL}/getteams", {
+  fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/getteams`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -70,7 +70,7 @@ useEffect(() => {
     return;
   }
     try {
-      const response = await fetch("${process.env.NEXT_PUBLIC_API_BASE_URL}/calendars", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/calendars`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
