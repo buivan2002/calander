@@ -38,30 +38,50 @@ const Calendar: React.FC = () => {
     Warning: "warning",
   };
 
-  useEffect(() => {
-    // Initialize with some events
-    setEvents([
-      {
-        id: "1",
-        title: "Event Conf.",
-        start: new Date().toISOString().split("T")[0],
-        extendedProps: { calendar: "Danger" },
-      },
-      {
-        id: "2",
-        title: "Meeting",
-        start: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-        extendedProps: { calendar: "Success" },
-      },
-      {
-        id: "3",
-        title: "Workshop",
-        start: new Date(Date.now() + 172800000).toISOString().split("T")[0],
-        end: new Date(Date.now() + 259200000).toISOString().split("T")[0],
-        extendedProps: { calendar: "Primary" },
-      },
-    ]);
-  }, []);
+  function getCalendarTag(status: string) {
+  switch (status.trim()) {
+    case "Hoàn thành":
+      return "Success";
+    case "Đang thực hiện":
+      return "Primary";
+    case "Chưa hoàn thành":
+    case "Chưa hoàn thành ":
+      return "Danger";
+    default:
+      return "Info";
+  }
+}
+useEffect(() => {
+  const fetchCalendars = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/getcalendars", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Lỗi khi lấy lịch");
+
+      const data = await res.json();
+
+      const mappedEvents = data.map((item: any) => ({
+        id: item.id.toString(),
+        title: item.name,
+        start: item.start_time.split("T")[0],
+        end: item.end_time?.split("T")[0],
+        extendedProps: {
+          calendar: getCalendarTag(item.status), // hoặc getRandomCalendarType()
+        },
+      }));
+
+      setEvents(mappedEvents);
+    } catch (err) {
+      console.error("❌ Lỗi fetch lịch:", err);
+    }
+  };
+
+  fetchCalendars();
+}, []);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     resetModalFields();

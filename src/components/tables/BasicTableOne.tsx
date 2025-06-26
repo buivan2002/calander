@@ -1,4 +1,8 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Button from "../ui/button/Button";
+
 import {
   Table,
   TableBody,
@@ -6,214 +10,183 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-
 import Badge from "../ui/badge/Badge";
-import Image from "next/image";
 
-interface Order {
+interface CalendarItem {
   id: number;
-  user: {
-    image: string;
-    name: string;
-    role: string;
-  };
-  projectName: string;
-  team: {
-    images: string[];
-  };
+  name: string;
+  type: string;
+  start_time: string;
+  end_time: string;
   status: string;
-  budget: string;
+  user: string;
+  team: string;
+  role: string;
 }
 
-// Define the table data using the interface
-const tableData: Order[] = [
-  {
-    id: 1,
-    user: {
-      image: "/images/user/user-17.jpg",
-      name: "Lindsey Curtis",
-      role: "Web Designer",
-    },
-    projectName: "Agency Website",
-    team: {
-      images: [
-        "/images/user/user-22.jpg",
-        "/images/user/user-23.jpg",
-        "/images/user/user-24.jpg",
-      ],
-    },
-    budget: "3.9K",
-    status: "Active",
-  },
-  {
-    id: 2,
-    user: {
-      image: "/images/user/user-18.jpg",
-      name: "Kaiya George",
-      role: "Project Manager",
-    },
-    projectName: "Technology",
-    team: {
-      images: ["/images/user/user-25.jpg", "/images/user/user-26.jpg"],
-    },
-    budget: "24.9K",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    user: {
-      image: "/images/user/user-17.jpg",
-      name: "Zain Geidt",
-      role: "Content Writing",
-    },
-    projectName: "Blog Writing",
-    team: {
-      images: ["/images/user/user-27.jpg"],
-    },
-    budget: "12.7K",
-    status: "Active",
-  },
-  {
-    id: 4,
-    user: {
-      image: "/images/user/user-20.jpg",
-      name: "Abram Schleifer",
-      role: "Digital Marketer",
-    },
-    projectName: "Social Media",
-    team: {
-      images: [
-        "/images/user/user-28.jpg",
-        "/images/user/user-29.jpg",
-        "/images/user/user-30.jpg",
-      ],
-    },
-    budget: "2.8K",
-    status: "Cancel",
-  },
-  {
-    id: 5,
-    user: {
-      image: "/images/user/user-21.jpg",
-      name: "Carla George",
-      role: "Front-end Developer",
-    },
-    projectName: "Website",
-    team: {
-      images: [
-        "/images/user/user-31.jpg",
-        "/images/user/user-32.jpg",
-        "/images/user/user-33.jpg",
-      ],
-    },
-    budget: "4.5K",
-    status: "Active",
-  },
-];
+export default function CalendarTable() {
+  const [calendars, setCalendars] = useState<CalendarItem[]>([]);
+  const [editingCalendar, setEditingCalendar] = useState<CalendarItem | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
-export default function BasicTableOne() {
+  useEffect(() => {
+    const fetchCalendars = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/api/getcalendars", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Lỗi khi lấy dữ liệu lịch");
+
+        const data = await res.json();
+        setCalendars(data);
+      } catch (error) {
+        console.error("❌ Lỗi fetch lịch:", error);
+      }
+    };
+
+    fetchCalendars();
+  }, []);
+
+  const handleEdit = (calendar: CalendarItem) => {
+    setEditingCalendar(calendar);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setEditingCalendar(null);
+    setShowModal(false);
+  };
+
+  const handleUpdateCalendar = async (calendar: CalendarItem) => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/updatecalendar/${calendar.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(calendar),
+      });
+
+      if (!res.ok) throw new Error("Lỗi khi cập nhật");
+
+      setCalendars((prev) =>
+        prev.map((item) => (item.id === calendar.id ? calendar : item))
+      );
+      handleCloseModal();
+    } catch (err) {
+      console.error("❌ Cập nhật thất bại:", err);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Bạn có chắc muốn xóa?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/deletecalendar/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Lỗi khi xóa");
+
+      setCalendars((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      console.error("❌ Xóa thất bại:", err);
+    }
+  };
+
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div className="max-w-full overflow-x-auto">
         <div className="min-w-[1102px]">
           <Table>
-            {/* Table Header */}
             <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
               <TableRow>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  User
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Project Name
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Team
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Status
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Budget
-                </TableCell>
+                <TableCell isHeader className="px-5 py-3 text-theme-xs">User</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-theme-xs">Calendar</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-theme-xs">Team</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-theme-xs">Start Time</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-theme-xs">End Time</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-theme-xs">Status</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-theme-xs">Type</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-theme-xs">Role</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-theme-xs">Actions</TableCell>
               </TableRow>
             </TableHeader>
 
-            {/* Table Body */}
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-              {tableData.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="px-5 py-4 sm:px-6 text-start">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 overflow-hidden rounded-full">
-                        <Image
-                          width={40}
-                          height={40}
-                          src={order.user.image}
-                          alt={order.user.name}
-                        />
+              {calendars.map((calendar) => (
+                <TableRow key={calendar.id}>
+                  <TableCell className="px-5 py-4 text-start">
+                    <div>
+                      <div className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                        {calendar.user}
                       </div>
-                      <div>
-                        <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {order.user.name}
-                        </span>
-                        <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                          {order.user.role}
-                        </span>
+                      <div className="text-gray-500 text-theme-xs dark:text-gray-400">
+                        {calendar.role}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {order.projectName}
+
+                  <TableCell className="px-4 py-3 text-start text-theme-sm">
+                    {calendar.name}
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    <div className="flex -space-x-2">
-                      {order.team.images.map((teamImage, index) => (
-                        <div
-                          key={index}
-                          className="w-6 h-6 overflow-hidden border-2 border-white rounded-full dark:border-gray-900"
-                        >
-                          <Image
-                            width={24}
-                            height={24}
-                            src={teamImage}
-                            alt={`Team member ${index + 1}`}
-                            className="w-full"
-                          />
-                        </div>
-                      ))}
-                    </div>
+
+                  <TableCell className="px-4 py-3 text-start text-theme-sm text-gray-600">
+                    {calendar.team}
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+
+                  <TableCell className="px-4 py-3 text-theme-sm text-gray-600">
+                    {new Date(calendar.start_time).toLocaleString()}
+                  </TableCell>
+
+                  <TableCell className="px-4 py-3 text-theme-sm text-gray-600">
+                    {new Date(calendar.end_time).toLocaleString()}
+                  </TableCell>
+
+                  <TableCell className="px-4 py-3 text-theme-sm">
                     <Badge
                       size="sm"
                       color={
-                        order.status === "Active"
+                        calendar.status === "Active"
                           ? "success"
-                          : order.status === "Pending"
+                          : calendar.status === "Pending"
                           ? "warning"
                           : "error"
                       }
                     >
-                      {order.status}
+                      {calendar.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {order.budget}
+
+                  <TableCell className="px-4 py-3 text-theme-sm text-gray-600">
+                    {calendar.type}
+                  </TableCell>
+
+                  <TableCell className="px-4 py-3 text-theme-sm text-gray-600">
+                    {calendar.role}
+                  </TableCell>
+
+                  <TableCell className="px-4 py-3 text-theme-sm">
+                    <div className="flex gap-2">
+                     <button
+                      onClick={() => handleEdit(calendar)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                    >
+                      Edit
+                    </button>
+
+                      <button
+                        onClick={() => handleDelete(calendar.id)}
+                        className="text-red-500 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -221,6 +194,98 @@ export default function BasicTableOne() {
           </Table>
         </div>
       </div>
+
+      {/* Modal Edit */}
+      {showModal && editingCalendar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-[500px] shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Chỉnh sửa lịch</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleUpdateCalendar(editingCalendar);
+              }}
+              className="space-y-4"
+            >
+              <input
+                type="text"
+                value={editingCalendar.name}
+                onChange={(e) =>
+                  setEditingCalendar({ ...editingCalendar, name: e.target.value })
+                }
+                className="w-full border px-3 py-2 rounded"
+                placeholder="Tên lịch"
+              />
+                <input
+                 type="text"
+                 value={editingCalendar.team}
+                 onChange={(e) =>
+                   setEditingCalendar({ ...editingCalendar, team: e.target.value })
+                 }
+                 className="w-full border px-3 py-2 rounded"
+                 placeholder="Team"
+               />
+              <input
+                type="datetime-local"
+                value={new Date(editingCalendar.start_time).toISOString().slice(0, -1)}
+                onChange={(e) =>
+                  setEditingCalendar({
+                    ...editingCalendar,
+                    start_time: new Date(e.target.value).toISOString(),
+                  })
+                }
+                className="w-full border px-3 py-2 rounded"
+              />
+
+              <input
+                type="datetime-local"
+                value={new Date(editingCalendar.end_time).toISOString().slice(0, -1)}
+                onChange={(e) =>
+                  setEditingCalendar({
+                    ...editingCalendar,
+                    end_time: new Date(e.target.value).toISOString(),
+                  })
+                }
+                className="w-full border px-3 py-2 rounded"
+              />
+                <input
+                type="text"
+                value={editingCalendar.status}
+                onChange={(e) =>
+                  setEditingCalendar({ ...editingCalendar, status: e.target.value })
+                }
+                className="w-full border px-3 py-2 rounded"
+                placeholder="Status"
+              />
+               <input
+                type="text"
+                value={editingCalendar.type}
+                onChange={(e) =>
+                  setEditingCalendar({ ...editingCalendar, type: e.target.value })
+                }
+                className="w-full border px-3 py-2 rounded"
+                placeholder="Type"
+              />
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="px-4 py-2 bg-gray-300 rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import React, { useRef, useEffect } from "react";
 
 interface ModalProps {
   isOpen: boolean;
+  title?:string;
   onClose: () => void;
   className?: string;
   children: React.ReactNode;
@@ -12,6 +13,7 @@ interface ModalProps {
 
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
+  title, 
   onClose,
   children,
   className,
