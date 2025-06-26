@@ -66,7 +66,7 @@ const Calendar: React.FC = () => {
 useEffect(() => {
   const fetchCalendars = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/getcalendars", {
+      const res = await fetch("${process.env.NEXT_PUBLIC_API_BASE_URL}/getcalendars", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

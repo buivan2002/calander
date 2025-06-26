@@ -31,7 +31,7 @@ export default function CalendarTable() {
   useEffect(() => {
     const fetchCalendars = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/getcalendars", {
+        const res = await fetch("${process.env.NEXT_PUBLIC_API_BASE_URL}/getcalendars", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -63,7 +63,7 @@ export default function CalendarTable() {
 
   const handleUpdateCalendar = async (calendar: CalendarItem) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/updatecalendar/${calendar.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/updatecalendar/${calendar.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -85,7 +85,7 @@ export default function CalendarTable() {
     if (!confirm("Bạn có chắc muốn xóa?")) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/api/deletecalendar/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/deletecalendar/${id}`, {
         method: "DELETE",
         credentials: "include",
       });

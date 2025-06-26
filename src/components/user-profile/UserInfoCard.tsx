@@ -16,7 +16,7 @@ export default function MyTeams() {
   useEffect(() => {
   const fetchTeams = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/user-teams", {
+      const res = await fetch("${process.env.NEXT_PUBLIC_API_BASE_URL}/user-teams", {
         credentials: "include", // Để gửi cookie chứa token
       });
 
@@ -52,7 +52,7 @@ export default function MyTeams() {
     if (!teamName) return alert("Nhập tên team");
 
     try {
-      const response = await fetch("http://localhost:3001/api/team", {
+      const response = await fetch("${process.env.NEXT_PUBLIC_API_BASE_URL}/team", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
