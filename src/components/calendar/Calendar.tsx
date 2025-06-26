@@ -18,7 +18,19 @@ interface CalendarEvent extends EventInput {
     calendar: string;
   };
 }
-
+interface CalendarItem {
+  id: number;
+  name: string;
+  type: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  user_id: number;
+  team_id: number;
+  user: string;
+  team: string;
+  role: string;
+}
 const Calendar: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
@@ -64,7 +76,7 @@ useEffect(() => {
 
       const data = await res.json();
 
-      const mappedEvents = data.map((item: any) => ({
+      const mappedEvents = data.map((item: CalendarItem) => ({
         id: item.id.toString(),
         title: item.name,
         start: item.start_time.split("T")[0],

@@ -80,8 +80,6 @@ useEffect(() => {
       });
 
       if (!response.ok) throw new Error("Failed to create calendar");
-      const result = await response.json();
-
       createModal.closeModal();
     } catch (error) {
       console.error("Error creating calendar:", error);
