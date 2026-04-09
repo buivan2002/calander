@@ -1,173 +1,282 @@
-# TailAdmin Next.js - Free Next.js Tailwind Admin Dashboard Template
+# Calendar App - Frontend (Next.js)
 
-TailAdmin is a free and open-source admin dashboard template built on **Next.js and Tailwind CSS** providing developers with everything they need to create a feature-rich and data-driven: back-end, dashboard, or admin panel solution for any sort of web project.
+## 📋 Project Overview
 
-![TailAdmin - Next.js Dashboard Preview](./banner.png)
+**Calendar App** là frontend Next.js cho ứng dụng quản lý lịch và công việc nhóm. Cung cấp:
+- Dashboard quản lý công việc cá nhân
+- Quản lý lịch sự kiện
+- Tạo và quản lý nhóm
+- Xác thực người dùng (Đăng ký/Đăng nhập)
+- Giao diện dark mode
+- Sidebar navigation collapsible
 
-With TailAdmin Next.js, you get access to all the necessary dashboard UI components, elements, and pages required to build a high-quality and complete dashboard or admin panel. Whether you're building a dashboard or admin panel for a complex web application or a simple website. 
+---
 
-TailAdmin utilizes the powerful features of **Next.js 15** and common features of Next.js such as server-side rendering (SSR), static site generation (SSG), and seamless API route integration. Combined with the advancements of **React 19** and the robustness of **TypeScript**, TailAdmin is the perfect solution to help get your project up and running quickly.
+## 🛠️ Tech Stack
 
-## Overview
+| Công nghệ | Phiên bản | Mục đích |
+|-----------|----------|---------|
+| **Next.js** | 15.2.3 | Framework React |
+| **React** | 19.0.0 | UI Library |
+| **TypeScript** | Latest | Type safety |
+| **Tailwind CSS** | 4.0.9 | Styling |
+| **ApexCharts** | 4.3.0 | Data visualization |
+| **FullCalendar** | 6.1.15 | Calendar component |
+| **Flatpickr** | 4.6.13 | Date picker |
+| **React DnD** | 16.0.1 | Drag & drop |
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and control panels. It's built on:
+---
 
-- Next.js 15.x
-- React 19
-- TypeScript
-- Tailwind CSS V4
+## 📁 Project Structure
 
-### Quick Links
-- [✨ Visit Website](https://tailadmin.com)
-- [📄 Documentation](https://tailadmin.com/docs)
-- [⬇️ Download](https://tailadmin.com/download)
-- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1463141366275764364)
-- [⚡ Get PRO Version](https://tailadmin.com/pricing)
-
-### Demos
-- [Free Version](https://nextjs-free-demo.tailadmin.com)
-- [Pro Version](https://nextjs-demo.tailadmin.com)
-
-### Other Versions
-- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-- [React Version](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
-- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
-
-## Installation
-
-### Prerequisites
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
-
-- Node.js 18.x or later (recommended to use Node.js 20.x or later)
-
-### Cloning the Repository
-Clone the repository using the following command:
-
-```bash
-git clone https://github.com/TailAdmin/free-nextjs-admin-dashboard.git
+```
+calander/
+├── src/
+│   ├── app/                 # Next.js App Router
+│   │   ├── globals.css      # Global styles
+│   │   ├── layout.tsx       # Root layout
+│   │   ├── not-found.tsx    # 404 page
+│   │   ├── (admin)/         # Protected admin routes
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx     # Dashboard
+│   │   │   └── (others-pages)/
+│   │   └── (full-width-pages)/
+│   │       ├── (auth)/      # Login/Register
+│   │       └── (error-pages)/
+│   ├── components/          # Reusable components
+│   │   ├── auth/            # SignIn, SignUp forms
+│   │   ├── calendar/        # Calendar component
+│   │   ├── charts/          # Chart components
+│   │   ├── common/          # Shared components
+│   │   ├── ecommerce/       # Dashboard widgets
+│   │   ├── form/            # Form elements
+│   │   ├── header/          # Header component
+│   │   ├── tables/          # Table components
+│   │   └── ui/              # UI elements
+│   ├── context/             # React Context
+│   │   ├── SidebarContext.tsx  # Sidebar state
+│   │   └── ThemeContext.tsx    # Dark mode
+│   ├── hooks/               # Custom hooks
+│   │   ├── useGoBack.ts
+│   │   └── useModal.ts
+│   ├── middleware.ts        # Next.js middleware (auth guard)
+│   └── icons/               # Icon components
+├── public/                  # Static assets
+│   └── images/              # Images (brand, icons, etc.)
+├── .env                     # Environment variables
+├── next.config.ts           # Next.js config
+├── tailwind.config.js       # Tailwind config
+└── tsconfig.json            # TypeScript config
 ```
 
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
+---
 
-1. Install dependencies:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-    > Use `--legacy-peer-deps` flag if you face peer-dependency error during installation.
+## 🔑 Key Features
 
-2. Start the development server:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    ```
+### Authentication
+- Đăng ký người dùng mới
+- Đăng nhập với email/password
+- JWT token lưu trong HTTPOnly cookie
+- Route protection với middleware
 
-## Components
+### Dashboard
+- Overview công việc
+- Chart visualization (Bar, Line charts)
+- Todo list management
+- Recent orders/activities
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using Next.js and Tailwind CSS. The template includes:
+### Calendar Management
+- Xem lịch tháng/tuần/ngày
+- Tạo sự kiện lịch
+- Edit/Delete sự kiện
+- FullCalendar integration
 
-- Sophisticated and accessible sidebar
-- Data visualization components
-- Profile management and custom 404 page
-- Tables and Charts(Line and Bar)
-- Authentication forms and input elements
-- Alerts, Dropdowns, Modals, Buttons and more
-- Can't forget Dark Mode 🕶️
+### Team Management
+- Tạo nhóm mới
+- Quản lý thành viên
+- Gán vai trò
+- Nhóm lịch chia sẻ
 
-All components are built with React and styled using Tailwind CSS for easy customization.
+### UI Features
+- Dark mode toggle
+- Responsive sidebar (collapsible)
+- Tables & data display
+- Forms & input validation
+- Dropdowns, modals, alerts
+- Data visualization (ApexCharts)
 
-## Feature Comparison
+---
 
-### Free Version
-- 1 Unique Dashboard
-- 30+ dashboard components
-- 50+ UI elements
-- Basic Figma design files
-- Community support
+## 🚀 Installation & Setup
 
-### Pro Version
-- 5 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, Stocks (more coming soon)
-- 400+ dashboard components and UI elements
-- Complete Figma design file
-- Email support
+### 1. Install dependencies
+```bash
+cd calander
+npm install
+```
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+### 2. Setup environment variables
+Chỉnh sửa file `.env`:
+```bash
+# API endpoint (Backend URL)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
+# Hoặc production
+NEXT_PUBLIC_API_BASE_URL=https://be-calander.onrender.com/api
+```
 
-## Changelog
+### 3. Run development server
+```bash
+npm run dev
+```
 
-### Version 2.0.2 - [March 25, 2025]
+Frontend chạy tại: `http://localhost:3000`
 
-- Upgraded to Next v15.2.3 for [CVE-2025-29927](https://nextjs.org/blog/cve-2025-29927) concerns
-- Included overrides vectormap for packages to prevent peer dependency errors during installation.
-- Migrated from react-flatpickr to flatpickr package for React 19 support
+**Thay đổi port (ví dụ: 3002)**:
+```bash
+npm run dev -- -p 3002
+```
 
-### Version 2.0.1 - [February 27, 2025]
+Hoặc thêm vào `.env.local`:
+```bash
+PORT=3002
+```
 
-#### Update Overview
+### 4. Build for production
+```bash
+npm run build
+npm start
+```
 
-- Upgraded to Tailwind CSS v4 for better performance and efficiency.
-- Updated class usage to match the latest syntax and features.
-- Replaced deprecated class and optimized styles.
+---
 
-#### Next Steps
+## 🔐 Authentication Flow
 
-- Run npm install or yarn install to update dependencies.
-- Check for any style changes or compatibility issues.
-- Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-- This update keeps the project up to date with the latest Tailwind improvements. 🚀
+1. User truy cập → middleware kiểm tra token
+2. Nếu không có token → redirect `/signin`
+3. Đăng nhập → gọi backend `/api/login`
+4. Backend trả token → lưu trong cookie
+5. Cookie tự động gửi kèm request tiếp theo
+6. Middleware xác thực → cho phép truy cập
 
-### v2.0.0 (February 2025)
-A major update focused on Next.js 15 implementation and comprehensive redesign.
+**Public routes** (không cần đăng nhập):
+- `/signin`
+- `/signup`
 
-#### Major Improvements
-- Complete redesign using Next.js 15 App Router and React Server Components
-- Enhanced user interface with Next.js-optimized components
-- Improved responsiveness and accessibility
-- New features including collapsible sidebar, chat screens, and calendar
-- Redesigned authentication using Next.js App Router and server actions
-- Updated data visualization using ApexCharts for React
+---
 
-#### Breaking Changes
+## 🌐 API Integration
 
-- Migrated from Next.js 14 to Next.js 15
-- Chart components now use ApexCharts for React
-- Authentication flow updated to use Server Actions and middleware
+Tất cả API calls sử dụng `NEXT_PUBLIC_API_BASE_URL` từ `.env`
 
-[Read more](https://tailadmin.com/docs/update-logs/nextjs) on this release.
+**Backend endpoints**: [Xem Be-calander README](../Be-calander/README.md#-api-endpoints)
 
-#### Breaking Changes
-- Migrated from Next.js 14 to Next.js 15
-- Chart components now use ApexCharts for React
-- Authentication flow updated to use Server Actions and middleware
+---
 
-### v1.3.4 (July 01, 2024)
-- Fixed JSvectormap rendering issues
+## 📊 Components Overview
 
-### v1.3.3 (June 20, 2024)
-- Fixed build error related to Loader component
+| Component | Mục đích |
+|-----------|---------|
+| **SignInForm** | Login form |
+| **SignUpForm** | Registration form |
+| **Calendar** | FullCalendar wrapper |
+| **Charts** | ApexCharts visualization |
+| **Tables** | Data table display |
+| **Sidebar** | Navigation menu |
+| **Header** | Top navigation bar |
+| **Modal** | Dialog components |
 
-### v1.3.2 (June 19, 2024)
-- Added ClickOutside component for dropdown menus
-- Refactored sidebar components
-- Updated Jsvectormap package
+---
 
-### v1.3.1 (Feb 12, 2024)
-- Fixed layout naming consistency
-- Updated styles
+## 🎨 Styling
 
-### v1.3.0 (Feb 05, 2024)
-- Upgraded to Next.js 14
-- Added Flatpickr integration
-- Improved form elements
-- Enhanced multiselect functionality
-- Added default layout component
+- **Tailwind CSS v4**: Utility-first CSS
+- **Dark Mode**: Context-based theme switching
+- **Responsive**: Mobile-first design
+- **Global Styles**: [globals.css](src/app/globals.css)
 
-## License
+---
 
-TailAdmin Next.js Free Version is released under the MIT License.
+## 🔗 Middleware
 
-## Support
+File [middleware.ts](src/middleware.ts) quản lý:
+- ✅ Route protection (require authentication)
+- ✅ Token verification
+- ✅ Automatic redirect for auth routes
+- ✅ Public/Private route configuration
 
-If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing and maintaining this template.
+---
+
+## 🗂️ Context Providers
+
+### SidebarContext
+- Quản lý sidebar open/close state
+- Accessible từ tất cả components
+
+### ThemeContext
+- Dark mode on/off
+- Theme preference storage
+
+---
+
+## 📝 Development Notes
+
+### Build Process
+- Next.js 15 với App Router
+- Server Components by default
+- TypeScript strict mode
+- SVG as React components (@svgr/webpack)
+
+### Deployment
+- Production URL: `https://calander-inky.vercel.app`
+- Hosted on Vercel
+- Environment variables configured
+
+---
+
+## 🐛 Troubleshooting
+
+| Vấn đề | Giải pháp |
+|--------|----------|
+| API 404 errors | Kiểm tra NEXT_PUBLIC_API_BASE_URL trong .env |
+| Auth redirect loop | Xóa cookie, đăng nhập lại |
+| Tailwind not loading | Chạy `npm install` lại |
+| Build error | Xóa `.next` folder, rebuild |
+
+---
+
+## 👨‍💻 Quick Commands
+
+```bash
+# Development
+npm run dev                    # Start dev server port 3000
+npm run dev -- -p 3002        # Start on custom port
+
+# Build & Production
+npm run build                  # Build for production
+npm start                      # Start production server
+npm run lint                   # Run ESLint
+
+# Links
+http://localhost:3000         # Dev frontend
+http://localhost:3001/api     # Dev backend (nếu chạy cùng)
+```
+
+---
+
+## 📚 File References
+
+- **Entry Point**: [src/app/layout.tsx](src/app/layout.tsx)
+- **Middleware**: [src/middleware.ts](src/middleware.ts)
+- **Auth Context**: [src/context/](src/context/)
+- **Components**: [src/components/](src/components/)
+
+---
+
+**Backend**: [Be-calander Repository](../Be-calander/)  
+**Production Demo**: [https://calander-inky.vercel.app](https://calander-inky.vercel.app)  
+**API Docs**: [Be-calander README](../Be-calander/README.md)
+
+---
+
+**Cập nhật**: April 8, 2026  
+**Version**: 2.0.2

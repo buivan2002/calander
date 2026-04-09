@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "../ui/table";
 import Badge from "../ui/badge/Badge";
+import { useCalendarRepository } from "@/hooks/repositories/useCalendarRepository";
 
 interface CalendarItem {
   id: number;
@@ -24,6 +25,7 @@ interface CalendarItem {
 }
 
 export default function CalendarTable() {
+  const { getCalendars, updateCalendar, deleteCalendar } = useCalendarRepository();
   const [calendars, setCalendars] = useState<CalendarItem[]>([]);
   const [editingCalendar, setEditingCalendar] = useState<CalendarItem | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -31,18 +33,8 @@ export default function CalendarTable() {
   useEffect(() => {
     const fetchCalendars = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/getcalendars`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!res.ok) throw new Error("Lỗi khi lấy dữ liệu lịch");
-
-        const data = await res.json();
-        setCalendars(data);
+        const data = await getCalendars();
+        setCalendars(data as CalendarItem[]);
       } catch (error) {
         console.error("❌ Lỗi fetch lịch:", error);
       }
@@ -63,14 +55,7 @@ export default function CalendarTable() {
 
   const handleUpdateCalendar = async (calendar: CalendarItem) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/updatecalendar/${calendar.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(calendar),
-      });
-
-      if (!res.ok) throw new Error("Lỗi khi cập nhật");
+      await updateCalendar(calendar.id, calendar);
 
       setCalendars((prev) =>
         prev.map((item) => (item.id === calendar.id ? calendar : item))
@@ -85,12 +70,7 @@ export default function CalendarTable() {
     if (!confirm("Bạn có chắc muốn xóa?")) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/deletecalendar/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("Lỗi khi xóa");
+      await deleteCalendar(id);
 
       setCalendars((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {

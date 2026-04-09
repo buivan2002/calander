@@ -6,10 +6,12 @@ import Button from "@/components/ui/button/Button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // ✅ Sử dụng router để chuyển trang
+import { useRouter } from "next/navigation"; 
+import { useAuthRepository } from "@/hooks/repositories/useAuthRepository";
 
 export default function SignInForm() {
   const router = useRouter();
+  const { login } = useAuthRepository();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
@@ -23,24 +25,12 @@ export default function SignInForm() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include", // cần để gửi cookie
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Đăng nhập thành công!");
-        router.push("/"); // ✅ chuyển hướng sau khi đăng nhập
-      } else {
-        alert(data.message || "Đăng nhập thất bại!");
-      }
-    } catch (error) {
+      const data = await login({ email, password });
+      alert("Đăng nhập thành công!");
+      router.push("/"); // ✅ chuyển hướng sau khi đăng nhập
+    } catch (error:any) {
       console.error("Login error:", error);
-      alert("Lỗi kết nối đến máy chủ!");
+      alert(error.message || "Lỗi kết nối đến máy chủ!");
     }
   };
 

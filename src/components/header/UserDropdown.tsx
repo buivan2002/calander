@@ -4,9 +4,11 @@ import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useRouter } from "next/navigation";
+import { useAuthRepository } from "@/hooks/repositories/useAuthRepository";
 
 export default function UserDropdown() {
     const router = useRouter();
+    const { logout } = useAuthRepository();
   const [isOpen, setIsOpen] = useState(false);
 
 function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
@@ -19,10 +21,7 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
   }
    const handleLogout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await logout();
 
       // Sau khi logout, chuyển hướng
       router.push("/signin");

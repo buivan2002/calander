@@ -12,12 +12,14 @@ import {
 } from "@fullcalendar/core";
 import { useModal } from "@/hooks/useModal";
 import { Modal } from "@/components/ui/modal";
+import { useCalendarRepository } from "@/hooks/repositories/useCalendarRepository";
 
 interface CalendarEvent extends EventInput {
   extendedProps: {
     calendar: string;
   };
 }
+// Giữ lại CalendarItem hoặc import từ types, ở đây đang có custom struct nên để tạm
 interface CalendarItem {
   id: number;
   name: string;
@@ -32,6 +34,7 @@ interface CalendarItem {
   role: string;
 }
 const Calendar: React.FC = () => {
+  const { getCalendars } = useCalendarRepository();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
   );
@@ -66,17 +69,9 @@ const Calendar: React.FC = () => {
 useEffect(() => {
   const fetchCalendars = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/getcalendars`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
+      const data = await getCalendars();
 
-      if (!res.ok) throw new Error("Lỗi khi lấy lịch");
-
-      const data = await res.json();
-
-      const mappedEvents = data.map((item: CalendarItem) => ({
+      const mappedEvents = data.map((item) => ({
         id: item.id.toString(),
         title: item.name,
         start: item.start_time.split("T")[0],

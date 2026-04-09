@@ -5,15 +5,17 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
+import { useAuthRepository } from "@/hooks/repositories/useAuthRepository";
 
-interface FormData {
+type FormData = {
   fname: string;
   email: string;
   password: string;
-}
+};
 
 export default function SignUpForm() {
   const router = useRouter();
+  const { register } = useAuthRepository();
   const [formData, setFormData] = useState<FormData>({
     fname: "",
     email: "",
@@ -31,21 +33,11 @@ export default function SignUpForm() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      console.log(data)
-
-      if (res.ok) {
+      const data = await register(formData);
+      console.log(data);
       router.push("/signin"); // ✅ chuyển hướng về trang đăng nhập
-      } else {
-        alert(data.message || "Đăng ký thất bại!");
-      }
-    } catch (err) {
-      alert("Lỗi kết nối đến máy chủ!");
+    } catch (err: any) {
+      alert(err?.message || "Lỗi kết nối đến máy chủ!");
       console.error(err);
     }
   };

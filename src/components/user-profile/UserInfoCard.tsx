@@ -1,40 +1,29 @@
 "use client";
-import React, { useState, useEffect } from "react"; // <== thêm useEffect
+import React, { useState, useEffect } from "react";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { Modal } from "../ui/modal";
-
-interface Team {
-  id: number;
-  name: string;
-  members: string[]; // Email list
-  roleName: string;
-}
+import { useTeamRepository } from "@/hooks/repositories/useTeamRepository";
+import { Team } from "@/types/api.type";
 
 export default function MyTeams() {
-  useEffect(() => {
-  const fetchTeams = async () => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user-teams`, {
-        credentials: "include", // Để gửi cookie chứa token
-      });
-
-      if (!res.ok) throw new Error("Không thể lấy dữ liệu team");
-
-      const data = await res.json();
-      // Gỉa sử API trả về [{ id, name, members: [email1, email2] }]
-      setTeams(data);
-    } catch (err) {
-      console.error("Lỗi khi fetch teams:", err);
-    }
-  };
-
-  fetchTeams();
-}, []);
-
+  const { getUserTeams } = useTeamRepository();
   const [teams, setTeams] = useState<Team[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const data = await getUserTeams();
+        setTeams(data);
+      } catch (err) {
+        console.error("Lỗi khi fetch teams:", err);
+      }
+    };
+
+    fetchTeams();
+  }, []);
 
   // Form state
   const [teamName, setTeamName] = useState("");

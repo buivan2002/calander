@@ -5,11 +5,9 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-
-type Team = {
-  id: string;
-  name: string;
-};
+import { useTeamRepository } from "@/hooks/repositories/useTeamRepository";
+import { useCalendarRepository } from "@/hooks/repositories/useCalendarRepository";
+import { Team } from "@/types/api.type";
 
 type CalendarData = {
   name: string;
@@ -22,6 +20,8 @@ type CalendarData = {
 
 export default function UserCalendarModals() {
   const createModal = useModal();
+  const { getTeams } = useTeamRepository();
+  const { createCalendar } = useCalendarRepository();
 
 
   const [calendarData, setCalendarData] = useState<CalendarData>({
@@ -35,23 +35,10 @@ export default function UserCalendarModals() {
 
   const [teams, setTeams] = useState<Team[]>([]);
 useEffect(() => {
-  fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/getteams`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      return res.json();
-    })
-    .then(setTeams)
+  getTeams()
+    .then((data) => setTeams(data as Team[]))
     .catch((err) => console.error("Failed to fetch teams:", err));
 }, []);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setCalendarData({ ...calendarData, [e.target.name]: e.target.value });
   };
@@ -70,16 +57,7 @@ useEffect(() => {
     return;
   }
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/calendars`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(calendarData),
-      });
-
-      if (!response.ok) throw new Error("Failed to create calendar");
+      await createCalendar(calendarData);
       createModal.closeModal();
     } catch (error) {
       console.error("Error creating calendar:", error);
