@@ -8,10 +8,13 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation"; 
 import { useAuthRepository } from "@/hooks/repositories/useAuthRepository";
+import { useAuthStore } from "@/store/useAuthStore";
+import { jwtDecode } from "jwt-decode";
 
 export default function SignInForm() {
   const router = useRouter();
   const { login } = useAuthRepository();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
@@ -25,7 +28,14 @@ export default function SignInForm() {
     e.preventDefault();
 
     try {
-      const data = await login({ email, password });
+      const data: any = await login({ email, password });
+      
+      // ✅ Decode token và lưu vào Zustand store
+      if (data && data.token) {
+        const decodedUser = jwtDecode(data.token);
+        setUser(decodedUser);
+      }
+
       alert("Đăng nhập thành công!");
       router.push("/"); // ✅ chuyển hướng sau khi đăng nhập
     } catch (error:any) {

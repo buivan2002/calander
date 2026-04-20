@@ -16,9 +16,16 @@ export interface CalendarItem {
   status: string;
   team_id: string | number;
   user_id: string | number;
+  assigner_id?: string | number;
   user?: string;
   team?: string;
   role?: string;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
 }
 
 export interface Team {
@@ -26,4 +33,5 @@ export interface Team {
   name: string;
   roleName?: string;
   members?: number;
+  users?: User[];
 }

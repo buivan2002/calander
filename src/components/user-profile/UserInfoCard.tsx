@@ -16,7 +16,8 @@ export default function MyTeams() {
     const fetchTeams = async () => {
       try {
         const data = await getUserTeams();
-        setTeams(data);
+        // API có thể trả về array hoặc object, normalize về array
+        setTeams(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Lỗi khi fetch teams:", err);
       }

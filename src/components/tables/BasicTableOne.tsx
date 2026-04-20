@@ -11,6 +11,7 @@ import {
 } from "../ui/table";
 import Badge from "../ui/badge/Badge";
 import { useCalendarRepository } from "@/hooks/repositories/useCalendarRepository";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface CalendarItem {
   id: number;
@@ -26,6 +27,8 @@ interface CalendarItem {
 
 export default function CalendarTable() {
   const { getCalendars, updateCalendar, deleteCalendar } = useCalendarRepository();
+  const user = useAuthStore((state) => state.user);
+  const role = user?.role || "user";
   const [calendars, setCalendars] = useState<CalendarItem[]>([]);
   const [editingCalendar, setEditingCalendar] = useState<CalendarItem | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -33,7 +36,7 @@ export default function CalendarTable() {
   useEffect(() => {
     const fetchCalendars = async () => {
       try {
-        const data = await getCalendars();
+        const data = await getCalendars(role);
         setCalendars(data as CalendarItem[]);
       } catch (error) {
         console.error("❌ Lỗi fetch lịch:", error);
@@ -41,7 +44,7 @@ export default function CalendarTable() {
     };
 
     fetchCalendars();
-  }, []);
+  }, [role]);
 
   const handleEdit = (calendar: CalendarItem) => {
     setEditingCalendar(calendar);

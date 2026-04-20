@@ -25,7 +25,7 @@ export const fetchWrapper = async <T>(
   let response: Response;
   try {
     response = await fetch(url, config);
-  } catch (error) {
+  } catch (error:any) {
     if (error.name === "AbortError") throw error;
     // Lỗi mạng hoặc block
     return Promise.reject({ status: 0, error: "Lỗi kết nối mạng", original: error });
