@@ -1,79 +1,64 @@
-# ========================================
-# Stage 1: Install Dependencies
-# ========================================
-FROM node:lts-alpine AS deps
-
+# ==========================================
+# Stage 1: Dependencies - Cài đặt thư viện
+# ==========================================
+FROM node:18-alpine AS deps
+# Cài libc6-compat vì Alpine thiếu một số thư viện C mà các module Node native cần
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+# Copy package files để tận dụng Docker layer cache
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
+  else echo "Không tìm thấy lockfile!" && exit 1; \
+  fi
 
-# Install all dependencies (including dev for build)
-RUN npm ci
-
-# ========================================
-# Stage 2: Build Application
-# ========================================
-FROM node:lts-alpine AS builder
-
+# ==========================================
+# Stage 2: Builder - Biên dịch mã nguồn
+# ==========================================
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Build arguments - NEXT_PUBLIC_* are baked into the build
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_APP_NAME
-ARG NEXT_PUBLIC_ENVIRONMENT=production
-
-# Set environment variables for build
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-ENV NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME}
-ENV NEXT_PUBLIC_ENVIRONMENT=${NEXT_PUBLIC_ENVIRONMENT}
-ENV NODE_ENV=production
-
-# Copy dependencies from previous stage
 COPY --from=deps /app/node_modules ./node_modules
-
-# Copy source code
 COPY . .
 
-# Build Next.js application (env vars are baked into static assets)
+# Vô hiệu hóa telemetry của Next.js cho CI/CD nhanh hơn
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Lệnh build sẽ tạo ra thư mục .next/standalone nhờ config ở trên
 RUN npm run build
 
-# ========================================
-# Stage 3: Production Runtime
-# ========================================
-FROM node:lts-alpine AS runner
-
+# ==========================================
+# Stage 3: Runner - Chạy ứng dụng (Production)
+# ==========================================
+FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
 
-# Runtime environment
-ENV NODE_ENV=production
-ENV PORT=4000
+# Chạy app dưới quyền user non-root để bảo mật (Zero Trust cơ bản)
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Copy built application from builder stage
+# Copy thư mục public
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
 
-# Copy package.json for production dependencies reference
-COPY package.json ./
+# Set quyền cho thư mục .next
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
 
-# Install runtime dependencies only
-RUN npm ci --omit=dev
+# COPY bản standalone (Chính là thứ đang gây lỗi của cậu)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+# COPY thư mục static (Rất nhiều người quên bước này khiến web không load được CSS/JS)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Set file ownership to nextjs user
-RUN chown -R nextjs:nodejs /app
-
-# Switch to non-root user
 USER nextjs
 
-# Expose port
 EXPOSE 4000
+ENV PORT 4000
+ENV HOSTNAME "0.0.0.0"
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:4000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
-
-# Start application
+# File server.js này được tự động sinh ra trong thư mục standalone
 CMD ["node", "server.js"]

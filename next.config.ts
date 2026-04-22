@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
+  output: 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
   },
