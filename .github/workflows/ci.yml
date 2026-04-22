@@ -138,16 +138,17 @@ jobs:
             
             # Update docker-compose
             echo "🔄 Updating frontend service..."
-            docker-compose -f docker-compose.prod.yml pull frontend
-            docker-compose -f docker-compose.prod.yml up -d frontend
+            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.yml down --remove-orphans
+            docker-compose -f docker-compose.yml up -d
             
             # Verify service is running
             echo "✅ Verifying frontend service..."
             sleep 5
-            docker-compose -f docker-compose.prod.yml ps frontend
+            docker-compose -f docker-compose.yml ps
             
             # Check health
-            HEALTH_CHECK=$(docker-compose -f docker-compose.prod.yml exec -T frontend curl -f http://localhost:4000 2>/dev/null || echo "failed")
+            HEALTH_CHECK=$(docker-compose -f docker-compose.yml exec -T frontend curl -f http://localhost:4000 2>/dev/null || echo "failed")
             if [ "$HEALTH_CHECK" != "failed" ]; then
               echo "✨ Frontend is healthy!"
             else
@@ -156,7 +157,7 @@ jobs:
             
             # Show logs
             echo "📋 Recent logs:"
-            docker-compose -f docker-compose.prod.yml logs --tail=20 frontend
+            docker-compose -f docker-compose.yml logs --tail=20 frontend
 
       - name: Slack Notification - Success
         if: success()
