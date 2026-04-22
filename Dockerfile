@@ -25,6 +25,10 @@ COPY . .
 
 # Vô hiệu hóa telemetry của Next.js cho CI/CD nhanh hơn
 ENV NEXT_TELEMETRY_DISABLED 1
+# ✅ FIX: Khai báo ARG để nhận build-args từ CI/CD
+ARG NEXT_PUBLIC_API_BASE_URL
+# ✅ FIX: Bake giá trị vào ENV để next build có thể đọc
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
 # Lệnh build sẽ tạo ra thư mục .next/standalone nhờ config ở trên
 RUN npm run build

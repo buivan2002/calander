@@ -68,7 +68,7 @@ jobs:
           
           # Build arguments - Next.js environment variables (baked into build)
           build-args: |
-            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+            NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
             NEXT_PUBLIC_ENVIRONMENT=production
           
           # Docker layer caching
