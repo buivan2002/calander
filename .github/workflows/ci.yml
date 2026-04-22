@@ -129,6 +129,8 @@ jobs:
             echo "================================"
             RAW_BRANCH="${{ github.ref_name }}"
             SAFE_TAG="${RAW_BRANCH//\//-}"
+            export FRONTEND_IMAGE_TAG="$SAFE_TAG"
+            export DOCKER_REGISTRY="${{ env.REGISTRY }}/${{ env.DOCKER_ORG }}"
             # Navigate to deployment directory
             cd /root/Fe-calander
             cat > .env << 'EOFENV'
