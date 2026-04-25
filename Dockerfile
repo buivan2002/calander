@@ -30,6 +30,10 @@ ARG NEXT_PUBLIC_API_BASE_URL
 # ✅ FIX: Bake giá trị vào ENV để next build có thể đọc
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
+# ✅ FIX: Khai báo ARG + ENV cho NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Lệnh build sẽ tạo ra thư mục .next/standalone nhờ config ở trên
 RUN npm run build
 
