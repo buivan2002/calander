@@ -14,8 +14,7 @@ import { useModal } from "@/hooks/useModal";
 import { Modal } from "@/components/ui/modal";
 import { useCalendarRepository } from "@/hooks/repositories/useCalendarRepository";
 import { useTeamRepository } from "@/hooks/repositories/useTeamRepository";
-import { Team, User } from "@/types/api.type";
-import DateTimePicker from "@/components/form/date-time-picker";
+import { CalendarItem, Team, User } from "@/types/api.type";
 import { useAuthStore } from "@/store/useAuthStore";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -42,6 +41,15 @@ interface CalendarEvent extends EventInput {
 
 type CustomFile = { uid: string; name: string; status: string; url: string };
 
+interface CalendarApiItem extends CalendarItem {
+  file?: {
+    id?: number;
+    file_path?: string;
+    file_name?: string;
+  };
+  file_url?: string | null;
+}
+
 const getApiUrl = (path: string | null | undefined) => {
   if (!path) return null;
   if (path.startsWith("http")) return path;
@@ -50,10 +58,13 @@ const getApiUrl = (path: string | null | undefined) => {
 };
 
 const Calendar: React.FC = () => {
-  const { getCalendars, createCalendar, updateCalendar, updateStatus, uploadFile } = useCalendarRepository();
+  const { getCalendars, createCalendar, updateCalendar, uploadFile } = useCalendarRepository();
   const { getUserTeams } = useTeamRepository();
   const user = useAuthStore((state) => state.user);
+  const isLoading = useAuthStore((state) => state.isLoading);
+
   const role = user?.role || "user";
+  const isAdmin = role === "admin";
 
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [eventTitle, setEventTitle] = useState("");
@@ -96,6 +107,19 @@ const Calendar: React.FC = () => {
     Warning: "warning",
   };
 
+  const resetModalFields = () => {
+    setSelectedEvent(null);
+    setEventTitle("");
+    setEventStartDate("");
+    setEventEndDate("");
+    setEventLevel("");
+    setSelectedTeamId("");
+    setAssigneeId("");
+    setEventStatus("pending");
+    setFileToUpload(null);
+    setFileList([]);
+  };
+
   function getCalendarTag(status: string) {
     if (status === 'completed' || status === 'Hoàn thành') return "Success";
     if (status === 'pending' || status === 'Chưa hoàn thành') return "Danger";
@@ -103,10 +127,12 @@ const Calendar: React.FC = () => {
   }
 
   const fetchCalendars = React.useCallback(async () => {
+    if (isLoading) return;
+
     try {
       const data = await getCalendars(role);
 
-      const mappedEvents = data.map((item: any) => ({
+      const mappedEvents = (data as CalendarApiItem[]).map((item) => ({
         id: item.id.toString(),
         title: item.name,
         start: item.start_time ? dayjs.utc(item.start_time).tz(userTimezone).format() : undefined,
@@ -130,7 +156,7 @@ const Calendar: React.FC = () => {
       console.error("❌ Lỗi fetch lịch:", err);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role]);
+  }, [role, isLoading]);
 
   useEffect(() => {
     fetchCalendars();
@@ -171,26 +197,42 @@ const Calendar: React.FC = () => {
   };
 
   const handleAddOrUpdateEvent = async () => {
-    const payload = {
+    const payload: {
+      name: string;
+      start_time: string | null;
+      end_time: string | null;
+      type: string;
+      status?: string;
+      file_id?: number | null;
+      team_id?: number | null;
+      assigner_id?: number | null;
+    } = {
       name: eventTitle,
-      start_time: eventStartDate ? dayjs.tz(eventStartDate, userTimezone).utc().toISOString() : undefined,
-      end_time: eventEndDate ? dayjs.tz(eventEndDate, userTimezone).utc().toISOString() : undefined,
+      start_time: eventStartDate ? dayjs.tz(eventStartDate, userTimezone).utc().toISOString() : null,
+      end_time: eventEndDate ? dayjs.tz(eventEndDate, userTimezone).utc().toISOString() : null,
       type: eventLevel,
-      team_id: selectedTeamId || undefined,
-      assigner_id: assigneeId || undefined,
     };
 
-    try {
-      let fileIdToSave: number | undefined = undefined;
+    if (isAdmin) {
+      payload.team_id = selectedTeamId || null;
+      payload.assigner_id = assigneeId || null;
+    }
 
+    try {
       if (selectedEvent) {
         if (eventStatus === 'completed' && fileToUpload) {
           const res = await uploadFile(fileToUpload);
-          fileIdToSave = res.file_id;
+          payload.file_id = res.file_id;
+        } else if (eventStatus === 'completed') {
+          payload.file_id = selectedEvent.extendedProps.file_id
+            ? Number(selectedEvent.extendedProps.file_id)
+            : null;
+        } else {
+          payload.file_id = null;
         }
 
+        payload.status = eventStatus;
         await updateCalendar(selectedEvent.id as string, payload);
-        await updateStatus(selectedEvent.id as string, eventStatus, fileIdToSave);
       } else {
         await createCalendar(payload);
       }
@@ -210,18 +252,7 @@ const Calendar: React.FC = () => {
     resetModalFields();
   };
 
-  const resetModalFields = () => {
-    setEventTitle("");
-    setEventStartDate("");
-    setEventEndDate("");
-    setEventLevel("");
-    setSelectedTeamId("");
-    setAssigneeId("");
-    setSelectedEvent(null);
-    setEventStatus("pending");
-    setFileToUpload(null);
-    setFileList([]);
-  };
+
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
@@ -338,7 +369,7 @@ const Calendar: React.FC = () => {
               />
             </div>
 
-            {role === "admin" && (
+            {isAdmin && (
               <>
                 <div className="mt-6">
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">

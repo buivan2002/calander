@@ -20,5 +20,16 @@ export function useAuthRepository() {
         method: "POST",
       });
     },
+    getMe: (): Promise<ApiResponse> => {
+      return fetchWrapper("/auth/me", {
+        method: "GET",
+      });
+    },
+    createAdmin: (payload: { email: string; password: string }): Promise<ApiResponse> => {
+      return fetchWrapper("/users/create-admin", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    },
   };
 }

@@ -1,6 +1,17 @@
 import { fetchWrapper } from "@/lib/api/fetchWrapper";
 import { CalendarItem } from "@/types/api.type";
 
+export interface UpdateCalendarPayload {
+  name?: string | null;
+  type?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  status?: string | null;
+  file_id?: number | null;
+  team_id?: number | null;
+  assigner_id?: number | null;
+}
+
 export function useCalendarRepository() {
   return {
     getCalendars: (role: string): Promise<CalendarItem[]> => {
@@ -13,7 +24,7 @@ export function useCalendarRepository() {
         body: JSON.stringify(payload),
       });
     },
-    updateCalendar: (id: string | number, payload: Partial<CalendarItem>): Promise<unknown> => {
+    updateCalendar: (id: string | number, payload: UpdateCalendarPayload): Promise<unknown> => {
       return fetchWrapper(`/calendars/${id}`, {
         method: "PUT",
         body: JSON.stringify(payload),

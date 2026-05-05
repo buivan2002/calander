@@ -17,6 +17,7 @@ export interface CalendarItem {
   team_id: string | number;
   user_id: string | number;
   assigner_id?: string | number;
+  file_id?: string | number | null;
   user?: string;
   team?: string;
   role?: string;
@@ -26,12 +27,15 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  role?: string;
+  roleId?: number;
+  roleName?: string;
 }
 
 export interface Team {
   id: string | number;
   name: string;
   roleName?: string;
-  members?: number;
+  memberCount?: number;
   users?: User[];
 }

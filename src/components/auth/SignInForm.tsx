@@ -9,7 +9,6 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation"; 
 import { useAuthRepository } from "@/hooks/repositories/useAuthRepository";
 import { useAuthStore } from "@/store/useAuthStore";
-import { jwtDecode } from "jwt-decode";
 
 export default function SignInForm() {
   const router = useRouter();
@@ -30,13 +29,12 @@ export default function SignInForm() {
     try {
       const data: any = await login({ email, password });
       
-      // ✅ Decode token và lưu vào Zustand store
-      if (data && data.token) {
-        const decodedUser = jwtDecode(data.token);
-        setUser(decodedUser);
+      // ✅ Lưu user data trực tiếp từ response (không cần decode JWT)
+      // Backend đã trả về user: { id, email, role } trong login response
+      if (data?.user) {
+        setUser(data.user);
       }
 
-      alert("Đăng nhập thành công!");
       router.push("/"); // ✅ chuyển hướng sau khi đăng nhập
     } catch (error:any) {
       console.error("Login error:", error);

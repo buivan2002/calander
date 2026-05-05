@@ -3,6 +3,8 @@ import './globals.css';
 
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import AuthProvider from '@/context/AuthProvider';
+import { Toaster } from 'react-hot-toast';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -17,7 +19,20 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${outfit.className} dark:bg-gray-900`}>
         <ThemeProvider>
-          <SidebarProvider>{children}</SidebarProvider>
+          <AuthProvider>
+            <SidebarProvider>{children}</SidebarProvider>
+          </AuthProvider>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                borderRadius: '12px',
+                padding: '12px 16px',
+                fontSize: '14px',
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>
